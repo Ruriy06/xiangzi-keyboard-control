@@ -1,0 +1,81 @@
+{
+  "device": {
+    "port": "COM5",
+    "baud_rate": 115200,
+    "screen_width": 2560,
+    "screen_height": 1600,
+    "key_press_delay": 100,
+    "key_release_delay": 10,
+    "combo_hold_delay": 50,
+    "mouse_press_delay": 30,
+    "mouse_click_delay": 50,
+    "mouse_move_delay": 50,
+    "max_jump": 80
+  },
+  "controls": {
+    "start_hotkey": "Ctrl+Alt+F8",
+    "stop_hotkey": "Ctrl+Alt+F9",
+    "side_buttons_enabled": true,
+    "start_side_button": "XBUTTON1",
+    "stop_side_button": "XBUTTON2"
+  },
+  "actions": [
+    {
+      "id": "333563c3-7b42-441f-9b22-82fdac082a81",
+      "name": "操作 1",
+      "steps": [
+        {
+          "kind": "key_tap",
+          "value": "TAB",
+          "extra": ""
+        },
+        {
+          "kind": "key_tap",
+          "value": "F1",
+          "extra": ""
+        },
+        {
+          "kind": "key_tap",
+          "value": "ESC",
+          "extra": ""
+        }
+      ]
+    }
+  ],
+  "workflows": [
+    {
+      "id": "0bd9bf0f-c2cf-44ad-ab87-c82db9ce0f40",
+      "name": "动作",
+      "nodes": [
+        {
+          "id": "947f6724-d737-4ca2-a73f-fcd6365f07ef",
+          "kind": "action",
+          "target_id": "333563c3-7b42-441f-9b22-82fdac082a81",
+          "repeat_count": 1,
+          "pause_milliseconds": 2222,
+          "children": []
+        }
+      ],
+      "active_minutes": 20.0,
+      "pause_minutes": 0.0,
+      "repeats": 0
+    },
+    {
+      "id": "644e10c3-9a80-4578-a176-4dbc99c12b51",
+      "name": "流程 2",
+      "nodes": [],
+      "active_minutes": 10.0,
+      "pause_minutes": 5.0,
+      "repeats": 0
+    },
+    {
+      "id": "5b5d3968-b935-4b92-b3c7-b3548bce8fa0",
+      "name": "流程 3",
+      "nodes": [],
+      "active_minutes": 10.0,
+      "pause_minutes": 5.0,
+      "repeats": 0
+    }
+  ],
+  "active_workflow_id": "0bd9bf0f-c2cf-44ad-ab87-c82db9ce0f40"
+}

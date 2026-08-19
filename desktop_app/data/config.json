@@ -1,0 +1,694 @@
+{
+  "device": {
+    "port": "COM5",
+    "baud_rate": 115200,
+    "screen_width": 3840,
+    "screen_height": 2160,
+    "key_press_delay": 100,
+    "key_release_delay": 10,
+    "combo_hold_delay": 50,
+    "mouse_press_delay": 30,
+    "mouse_click_delay": 50,
+    "mouse_move_delay": 50,
+    "max_jump": 80
+  },
+  "controls": {
+    "start_hotkey": "",
+    "stop_hotkey": "",
+    "side_buttons_enabled": true,
+    "start_side_button": "XBUTTON2",
+    "stop_side_button": "XBUTTON1"
+  },
+  "window_layout": {
+    "width_ratio": 0.684375,
+    "height_ratio": 0.7829457364341085,
+    "navigation_collapsed": false,
+    "last_window_state": "normal",
+    "theme": "light"
+  },
+  "material_capture": {
+    "window_title": "",
+    "hide_during_capture": false,
+    "color_pick_hotkey": "F6",
+    "template_capture_hotkey": "",
+    "region_capture_hotkey": ""
+  },
+  "vision": {
+    "rules": [],
+    "source": "template",
+    "color_hex": "#00FF00",
+    "hue_tolerance": 12,
+    "min_area": 20,
+    "window_title": "",
+    "region_x": 0,
+    "region_y": 0,
+    "region_width": 0,
+    "region_height": 0,
+    "response_step": null,
+    "target_material_id": "445598aa-21b9-445d-b98a-1cdc3ffeb3f9",
+    "region_material_id": "",
+    "template_path": "C:/Users/21915/Pictures/QQ20260726-232711.png",
+    "threshold": 0.85,
+    "scan_interval_ms": 500,
+    "action_mode": "report",
+    "action_id": "",
+    "timeout_seconds": 0
+  },
+  "vision_presets": [
+    {
+      "id": "0dce8625-520a-48a7-add2-94ceb2cc1318",
+      "name": "当前识图设置",
+      "settings": {
+        "rules": [],
+        "source": "template",
+        "color_hex": "#00FF00",
+        "hue_tolerance": 12,
+        "min_area": 20,
+        "window_title": "异环  ",
+        "region_x": 0,
+        "region_y": 0,
+        "region_width": 0,
+        "region_height": 0,
+        "response_step": null,
+        "target_material_id": "445598aa-21b9-445d-b98a-1cdc3ffeb3f9",
+        "region_material_id": "",
+        "template_path": "C:/Users/21915/Pictures/QQ20260726-232711.png",
+        "threshold": 0.85,
+        "scan_interval_ms": 500,
+        "action_mode": "report",
+        "action_id": "",
+        "timeout_seconds": 0
+      },
+      "locked": false
+    }
+  ],
+  "fishing": {
+    "mode": "ab_keys",
+    "hide_during_capture": true,
+    "capture_target": "b",
+    "a_source": "color",
+    "b_source": "color",
+    "color_a_hex": "#25BCA6",
+    "color_b_hex": "#FDFCB6",
+    "template_a_path": "F:\\jianshu\\desktop_app\\data\\fishing_templates\\a_26e8a1982e184c44b6cbbc55a95c45c5.png",
+    "template_b_path": "F:\\jianshu\\desktop_app\\data\\fishing_templates\\b_f32ca282bf2546729e567cf2cf7debb0.png",
+    "a_material_id": "7e92dd10-e75a-4dec-bbe7-8c990123e53c",
+    "b_material_id": "e91a2f3b-93be-469c-950c-65440a5bab7f",
+    "region_material_id": "409a5beb-2211-4c55-abe2-078ba2e6730f",
+    "template_threshold": 0.85,
+    "color_pick_hotkey": "F6",
+    "region_pick_hotkey": "",
+    "detection_hotkey": "F7",
+    "left_key": "A",
+    "right_key": "D",
+    "window_title": "",
+    "region_x": 621,
+    "region_y": 117,
+    "region_width": 717,
+    "region_height": 27,
+    "region_preview_path": "",
+    "hue_tolerance": 12,
+    "min_area": 120,
+    "b_min_area": 8,
+    "input_mode": "tap",
+    "tap_interval_ms": 250,
+    "scan_interval_ms": 100,
+    "dead_zone": 12,
+    "gain": 0.2,
+    "max_step": 40
+  },
+  "fishing_presets": [
+    {
+      "id": "0b27f368-70af-46cc-8a54-9c48fc059922",
+      "name": "识别",
+      "settings": {
+        "mode": "ab_keys",
+        "hide_during_capture": true,
+        "capture_target": "a",
+        "a_source": "color",
+        "b_source": "color",
+        "color_a_hex": "#25BCA6",
+        "color_b_hex": "#FDFCB6",
+        "template_a_path": "F:\\jianshu\\desktop_app\\data\\fishing_templates\\a_8810cb7174d94ff8a18062495be0f0b8.png",
+        "template_b_path": "",
+        "a_material_id": "7e92dd10-e75a-4dec-bbe7-8c990123e53c",
+        "b_material_id": "e91a2f3b-93be-469c-950c-65440a5bab7f",
+        "region_material_id": "8c42219a-4911-421c-93bb-6b6a6c6ede5c",
+        "template_threshold": 0.85,
+        "color_pick_hotkey": "F6",
+        "region_pick_hotkey": "",
+        "detection_hotkey": "F7",
+        "left_key": "A",
+        "right_key": "D",
+        "window_title": "异环  ",
+        "region_x": 219,
+        "region_y": 85,
+        "region_width": 1547,
+        "region_height": 348,
+        "region_preview_path": "",
+        "hue_tolerance": 12,
+        "min_area": 120,
+        "b_min_area": 8,
+        "input_mode": "tap",
+        "tap_interval_ms": 150,
+        "scan_interval_ms": 100,
+        "dead_zone": 12,
+        "gain": 0.2,
+        "max_step": 40
+      },
+      "locked": false
+    }
+  ],
+  "materials": [
+    {
+      "id": "7e92dd10-e75a-4dec-bbe7-8c990123e53c",
+      "name": "钓鱼颜色 #25BCA6",
+      "kind": "color",
+      "image_path": "",
+      "color_hex": "#25BCA6",
+      "window_title": "",
+      "region_x": 0,
+      "region_y": 0,
+      "region_width": 0,
+      "region_height": 0,
+      "marks": [],
+      "tags": [],
+      "note": "",
+      "locked": false
+    },
+    {
+      "id": "e91a2f3b-93be-469c-950c-65440a5bab7f",
+      "name": "钓鱼颜色 #FDFCB6",
+      "kind": "color",
+      "image_path": "",
+      "color_hex": "#FDFCB6",
+      "window_title": "",
+      "region_x": 0,
+      "region_y": 0,
+      "region_width": 0,
+      "region_height": 0,
+      "marks": [],
+      "tags": [],
+      "note": "",
+      "locked": false
+    },
+    {
+      "id": "445598aa-21b9-445d-b98a-1cdc3ffeb3f9",
+      "name": "迁移的模板 QQ20260726-232711",
+      "kind": "template",
+      "image_path": "C:/Users/21915/Pictures/QQ20260726-232711.png",
+      "color_hex": "",
+      "window_title": "异环  ",
+      "region_x": 0,
+      "region_y": 0,
+      "region_width": 0,
+      "region_height": 0,
+      "marks": [],
+      "tags": [],
+      "note": "",
+      "locked": false
+    },
+    {
+      "id": "409a5beb-2211-4c55-abe2-078ba2e6730f",
+      "name": "钓鱼框上",
+      "kind": "region",
+      "image_path": "",
+      "color_hex": "",
+      "window_title": "",
+      "region_x": 621,
+      "region_y": 117,
+      "region_width": 717,
+      "region_height": 27,
+      "marks": [],
+      "tags": [],
+      "note": "",
+      "locked": false
+    },
+    {
+      "id": "8c42219a-4911-421c-93bb-6b6a6c6ede5c",
+      "name": "迁移的区域 区域",
+      "kind": "region",
+      "image_path": "",
+      "color_hex": "",
+      "window_title": "异环  ",
+      "region_x": 219,
+      "region_y": 85,
+      "region_width": 1547,
+      "region_height": 348,
+      "marks": [],
+      "tags": [],
+      "note": "",
+      "locked": false
+    }
+  ],
+  "actions": [
+    {
+      "id": "333563c3-7b42-441f-9b22-82fdac082a81",
+      "name": "开心骑乘",
+      "hotkey": "",
+      "steps": [
+        {
+          "kind": "key_tap",
+          "value": "TAB",
+          "delay_after_ms": 1000,
+          "random_wait_min_ms": 0,
+          "random_wait_max_ms": 0
+        },
+        {
+          "kind": "key_tap",
+          "value": "F1",
+          "delay_after_ms": 2000,
+          "random_wait_min_ms": 0,
+          "random_wait_max_ms": 0
+        },
+        {
+          "kind": "key_tap",
+          "value": "ESC",
+          "delay_after_ms": 500,
+          "random_wait_min_ms": 0,
+          "random_wait_max_ms": 0
+        },
+        {
+          "kind": "key_tap",
+          "value": "R",
+          "delay_after_ms": 15000,
+          "random_wait_min_ms": 0,
+          "random_wait_max_ms": 0
+        },
+        {
+          "kind": "key_tap",
+          "value": "X",
+          "delay_after_ms": 1000,
+          "random_wait_min_ms": 0,
+          "random_wait_max_ms": 0
+        }
+      ],
+      "locked": true
+    },
+    {
+      "id": "dd63f99f-e23e-4dcc-a76c-1973be9cf7d4",
+      "name": "时间",
+      "hotkey": "",
+      "steps": [
+        {
+          "kind": "key_tap",
+          "value": "D",
+          "delay_after_ms": 300,
+          "random_wait_min_ms": 0,
+          "random_wait_max_ms": 0
+        },
+        {
+          "kind": "key_tap",
+          "value": "W",
+          "delay_after_ms": 500,
+          "random_wait_min_ms": 0,
+          "random_wait_max_ms": 0
+        },
+        {
+          "kind": "key_tap",
+          "value": "S",
+          "delay_after_ms": 500,
+          "random_wait_min_ms": 0,
+          "random_wait_max_ms": 0
+        },
+        {
+          "kind": "key_tap",
+          "value": "F",
+          "delay_after_ms": 8000,
+          "random_wait_min_ms": 0,
+          "random_wait_max_ms": 0
+        },
+        {
+          "kind": "key_tap",
+          "value": "1",
+          "delay_after_ms": 3000,
+          "random_wait_min_ms": 0,
+          "random_wait_max_ms": 0
+        },
+        {
+          "kind": "key_tap",
+          "value": "SPACE",
+          "delay_after_ms": 2000,
+          "random_wait_min_ms": 0,
+          "random_wait_max_ms": 0
+        },
+        {
+          "kind": "key_tap",
+          "value": "1",
+          "delay_after_ms": 8000,
+          "random_wait_min_ms": 0,
+          "random_wait_max_ms": 0
+        },
+        {
+          "kind": "key_tap",
+          "value": "2",
+          "delay_after_ms": 6000,
+          "random_wait_min_ms": 0,
+          "random_wait_max_ms": 0
+        },
+        {
+          "kind": "key_tap",
+          "value": "2",
+          "delay_after_ms": 620,
+          "random_wait_min_ms": 0,
+          "random_wait_max_ms": 0
+        },
+        {
+          "kind": "mouse_click",
+          "value": "LEFT",
+          "delay_after_ms": 220,
+          "random_wait_min_ms": 0,
+          "random_wait_max_ms": 0
+        },
+        {
+          "kind": "key_tap",
+          "value": "3",
+          "delay_after_ms": 640,
+          "random_wait_min_ms": 0,
+          "random_wait_max_ms": 0
+        },
+        {
+          "kind": "mouse_click",
+          "value": "LEFT",
+          "delay_after_ms": 250,
+          "random_wait_min_ms": 0,
+          "random_wait_max_ms": 0
+        },
+        {
+          "kind": "key_tap",
+          "value": "4",
+          "delay_after_ms": 660,
+          "random_wait_min_ms": 0,
+          "random_wait_max_ms": 0
+        },
+        {
+          "kind": "mouse_click",
+          "value": "LEFT",
+          "delay_after_ms": 230,
+          "random_wait_min_ms": 0,
+          "random_wait_max_ms": 0
+        },
+        {
+          "kind": "key_tap",
+          "value": "5",
+          "delay_after_ms": 670,
+          "random_wait_min_ms": 0,
+          "random_wait_max_ms": 0
+        },
+        {
+          "kind": "mouse_click",
+          "value": "LEFT",
+          "delay_after_ms": 280,
+          "random_wait_min_ms": 0,
+          "random_wait_max_ms": 0
+        },
+        {
+          "kind": "key_tap",
+          "value": "6",
+          "delay_after_ms": 620,
+          "random_wait_min_ms": 0,
+          "random_wait_max_ms": 0
+        },
+        {
+          "kind": "mouse_click",
+          "value": "LEFT",
+          "delay_after_ms": 3000,
+          "random_wait_min_ms": 0,
+          "random_wait_max_ms": 0
+        },
+        {
+          "kind": "key_tap",
+          "value": "1",
+          "delay_after_ms": 5000,
+          "random_wait_min_ms": 0,
+          "random_wait_max_ms": 0
+        }
+      ],
+      "locked": true
+    },
+    {
+      "id": "5c56524d-c037-4dd7-8b59-357fcfe10163",
+      "name": "普通扔球",
+      "hotkey": "",
+      "steps": [
+        {
+          "kind": "mouse_button_down",
+          "value": "LEFT",
+          "delay_after_ms": 50,
+          "random_wait_min_ms": 0,
+          "random_wait_max_ms": 0
+        },
+        {
+          "kind": "mouse_button_up",
+          "value": "LEFT",
+          "delay_after_ms": 200,
+          "random_wait_min_ms": 0,
+          "random_wait_max_ms": 0
+        }
+      ],
+      "locked": true
+    },
+    {
+      "id": "c1855db4-2cef-4c97-ab36-a9585df0c68e",
+      "name": "原版默认自动扔球",
+      "hotkey": "",
+      "steps": [
+        {
+          "kind": "mouse_button_down",
+          "value": "LEFT",
+          "delay_after_ms": 200,
+          "random_wait_min_ms": 0,
+          "random_wait_max_ms": 0
+        },
+        {
+          "kind": "mouse_button_up",
+          "value": "LEFT",
+          "delay_after_ms": 150,
+          "random_wait_min_ms": 0,
+          "random_wait_max_ms": 0
+        },
+        {
+          "kind": "key_down",
+          "value": "SHIFT",
+          "delay_after_ms": 50,
+          "random_wait_min_ms": 0,
+          "random_wait_max_ms": 0
+        },
+        {
+          "kind": "key_up",
+          "value": "SHIFT",
+          "delay_after_ms": 50,
+          "random_wait_min_ms": 0,
+          "random_wait_max_ms": 0
+        }
+      ],
+      "locked": true
+    },
+    {
+      "id": "afef177c-9f14-421d-827a-20067b99e9fd",
+      "name": "降速自动扔球",
+      "hotkey": "",
+      "steps": [
+        {
+          "kind": "mouse_button_down",
+          "value": "LEFT",
+          "delay_after_ms": 250,
+          "random_wait_min_ms": 0,
+          "random_wait_max_ms": 0
+        },
+        {
+          "kind": "mouse_button_up",
+          "value": "LEFT",
+          "delay_after_ms": 200,
+          "random_wait_min_ms": 0,
+          "random_wait_max_ms": 0
+        },
+        {
+          "kind": "key_down",
+          "value": "SHIFT",
+          "delay_after_ms": 75,
+          "random_wait_min_ms": 0,
+          "random_wait_max_ms": 0
+        },
+        {
+          "kind": "key_up",
+          "value": "SHIFT",
+          "delay_after_ms": 75,
+          "random_wait_min_ms": 0,
+          "random_wait_max_ms": 0
+        }
+      ],
+      "locked": true
+    },
+    {
+      "id": "dafe9d82-db23-44b4-b085-2346d530d9da",
+      "name": "粉爪",
+      "hotkey": "",
+      "steps": [
+        {
+          "kind": "key_tap",
+          "value": "F",
+          "delay_after_ms": 60,
+          "random_wait_min_ms": 0,
+          "random_wait_max_ms": 0
+        },
+        {
+          "kind": "wheel",
+          "value": "-1",
+          "delay_after_ms": 130,
+          "random_wait_min_ms": 0,
+          "random_wait_max_ms": 0
+        },
+        {
+          "kind": "key_tap",
+          "value": "F",
+          "delay_after_ms": 60,
+          "random_wait_min_ms": 0,
+          "random_wait_max_ms": 0
+        },
+        {
+          "kind": "wheel",
+          "value": "-1",
+          "delay_after_ms": 130,
+          "random_wait_min_ms": 0,
+          "random_wait_max_ms": 0
+        }
+      ],
+      "locked": true
+    }
+  ],
+  "workflows": [
+    {
+      "id": "5c0e61b1-c4d0-4762-a01e-1cf37fa6c85b",
+      "name": "flower",
+      "hotkey": "",
+      "mode": "ab",
+      "primary_action_id": "333563c3-7b42-441f-9b22-82fdac082a81",
+      "secondary_action_id": "dd63f99f-e23e-4dcc-a76c-1973be9cf7d4",
+      "secondary_trigger_ms": 1080000,
+      "secondary_vision_preset_id": "",
+      "custom_steps": [],
+      "tasks": [],
+      "root_step": null,
+      "blocks": [],
+      "active_duration_ms": 3600000,
+      "rest_duration_ms": 300000,
+      "repeats": 0,
+      "finish_current_action": true,
+      "custom_scheduler_enabled": false,
+      "scheduler_primary_block_id": "",
+      "scheduler_secondary_block_id": "",
+      "scheduler_trigger_ms": 0,
+      "scheduler_resume_primary": true,
+      "requires_reconfiguration": false,
+      "locked": true
+    },
+    {
+      "id": "9ba5ab74-7544-40f5-8ec6-8a0e8ad9ff41",
+      "name": "自定义流程 1",
+      "hotkey": "",
+      "mode": "custom",
+      "primary_action_id": "",
+      "secondary_action_id": "",
+      "secondary_trigger_ms": 0,
+      "secondary_vision_preset_id": "",
+      "custom_steps": [],
+      "tasks": [],
+      "root_step": {
+        "id": "599a6f7b-f75c-4046-859a-038569a0e24c",
+        "title": "整个流程",
+        "kind": "group",
+        "enabled": true,
+        "action_id": "",
+        "vision_preset_id": "",
+        "fishing_preset_id": "",
+        "direct_step": null,
+        "repeat_mode": "once",
+        "repeat_count": 1,
+        "limit_ms": 0,
+        "limit_policy": "finish_current",
+        "random_wait_min_ms": 0,
+        "random_wait_max_ms": 0,
+        "group_mode": "sequential",
+        "trigger_type": "immediate",
+        "execution_mode": "sequence",
+        "trigger_after_ms": 0,
+        "trigger_vision_preset_id": "",
+        "trigger_step_id": "",
+        "pause_target_step_ids": [],
+        "pause_others": true,
+        "resume_paused": true,
+        "children": [
+          {
+            "id": "0439adc6-5373-48c5-a8e4-2216fc1e6841",
+            "title": "未配置卡片",
+            "kind": "empty",
+            "enabled": true,
+            "action_id": "",
+            "vision_preset_id": "",
+            "fishing_preset_id": "",
+            "direct_step": null,
+            "repeat_mode": "once",
+            "repeat_count": 1,
+            "limit_ms": 0,
+            "limit_policy": "finish_current",
+            "random_wait_min_ms": 0,
+            "random_wait_max_ms": 0,
+            "group_mode": "sequential",
+            "trigger_type": "immediate",
+            "execution_mode": "sequence",
+            "trigger_after_ms": 0,
+            "trigger_vision_preset_id": "",
+            "trigger_step_id": "",
+            "pause_target_step_ids": [],
+            "pause_others": true,
+            "resume_paused": true,
+            "children": [
+              {
+                "id": "3fe6bf0a-cca2-47db-8bd1-d40dcefdaf4d",
+                "title": "未配置卡片",
+                "kind": "empty",
+                "enabled": true,
+                "action_id": "",
+                "vision_preset_id": "",
+                "fishing_preset_id": "",
+                "direct_step": null,
+                "repeat_mode": "once",
+                "repeat_count": 1,
+                "limit_ms": 0,
+                "limit_policy": "finish_current",
+                "random_wait_min_ms": 0,
+                "random_wait_max_ms": 0,
+                "group_mode": "sequential",
+                "trigger_type": "step_complete",
+                "execution_mode": "sequence",
+                "trigger_after_ms": 0,
+                "trigger_vision_preset_id": "",
+                "trigger_step_id": "0439adc6-5373-48c5-a8e4-2216fc1e6841",
+                "pause_target_step_ids": [],
+                "pause_others": true,
+                "resume_paused": true,
+                "children": []
+              }
+            ]
+          }
+        ]
+      },
+      "blocks": [],
+      "active_duration_ms": 600000,
+      "rest_duration_ms": 300000,
+      "repeats": 0,
+      "finish_current_action": true,
+      "custom_scheduler_enabled": false,
+      "scheduler_primary_block_id": "",
+      "scheduler_secondary_block_id": "",
+      "scheduler_trigger_ms": 0,
+      "scheduler_resume_primary": true,
+      "requires_reconfiguration": false,
+      "locked": false
+    }
+  ],
+  "active_workflow_id": "9ba5ab74-7544-40f5-8ec6-8a0e8ad9ff41",
+  "active_target_kind": "action",
+  "active_target_id": "dd63f99f-e23e-4dcc-a76c-1973be9cf7d4"
+}

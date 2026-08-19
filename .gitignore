@@ -1,0 +1,21 @@
+# 大型本地文件（不进入 Git）
+jianshu.7z
+*.7z
+arduino-ide*.exe
+*.exe
+build/
+.narrafork/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# 用户运行数据与配置（随版本库共享，但排除本地日志）
+desktop_app/data/startup-error.log
+desktop_app/*.log
+
+# 编辑器
+.vscode/
+.idea/
