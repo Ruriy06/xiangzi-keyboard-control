@@ -5,12 +5,11 @@ os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
 from PySide6.QtWidgets import QApplication
 
-from hid_control.models import ActionDefinition, ActionKind, ActionStep, FishingSettings, VisionSettings
+from hid_control.models import ActionDefinition, ActionKind, ActionStep
 from hid_control.ui.action_editor import ActionEditor
 from hid_control.ui.duration_input import DurationInput
 from hid_control.ui.settings import SettingsPage
 from hid_control.ui.step_input import StepInputPanel
-from hid_control.ui.vision_page import VisionPage
 
 
 class ActionEditorTests(unittest.TestCase):
@@ -126,19 +125,6 @@ class ActionEditorTests(unittest.TestCase):
         self.assertTrue(panel.random_wait_max_label.wordWrap())
         self.assertGreaterEqual(panel.random_wait_min_label.minimumWidth(), 128)
         self.assertIn("下限", panel.random_wait_min_label.toolTip())
-
-    def test_vision_page_starts_disabled_and_emits_settings(self) -> None:
-        page = VisionPage()
-        page.set_data([], VisionSettings(template_path="D:/target.png", threshold=0.91, scan_interval_ms=700), FishingSettings())
-        self.assertFalse(page.template_enabled.isChecked())
-        self.assertFalse(page.fishing_enabled.isChecked())
-        self.assertEqual(page.template_path.text(), "D:/target.png")
-        self.assertEqual(page.template_threshold.value(), 0.91)
-
-        captured: list[VisionSettings] = []
-        page.template_settings_changed.connect(captured.append)
-        page.template_interval.setValue(800)
-        self.assertEqual(captured[-1].scan_interval_ms, 800)
 
     def test_device_status_panel_shows_firmware_reported_values(self) -> None:
         page = SettingsPage()

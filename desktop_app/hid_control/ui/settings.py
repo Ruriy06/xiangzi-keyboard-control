@@ -120,7 +120,7 @@ class SettingsPage(QWidget):
         appearance_group = QGroupBox("界面外观")
         appearance_form = QFormLayout(appearance_group)
         appearance_form.addRow("护眼主题", self.theme_combo)
-        appearance_form.addRow(QLabel("主题会立即应用并自动保存；不影响正在运行的识图或流程。"))
+        appearance_form.addRow(QLabel("主题会立即应用并自动保存；不影响正在运行的流程。"))
         permission_group = QGroupBox("应用权限")
         permission_layout = QVBoxLayout(permission_group)
         permission_layout.addWidget(self.permission_label)

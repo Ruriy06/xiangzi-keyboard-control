@@ -3,7 +3,7 @@ from __future__ import annotations
 from PySide6.QtCore import QSize, Signal
 from PySide6.QtWidgets import QCheckBox, QComboBox, QFormLayout, QHBoxLayout, QLabel, QLineEdit, QListWidget, QListWidgetItem, QPushButton, QScrollArea, QSpinBox, QToolButton, QVBoxLayout, QWidget
 
-from ..models import ActionDefinition, FlowMode, VisionPreset, WorkflowDefinition
+from ..models import ActionDefinition, FlowMode, WorkflowDefinition
 from .duration_input import DurationInput, format_duration
 
 
@@ -15,7 +15,6 @@ class ABFlowPage(QWidget):
         super().__init__()
         self._workflows: list[WorkflowDefinition] = []
         self._actions: list[ActionDefinition] = []
-        self._vision_presets: list[VisionPreset] = []
         self._active_id = ""
         self._selected_id = ""
 
@@ -27,7 +26,6 @@ class ABFlowPage(QWidget):
         self.hotkey_input.setPlaceholderText("留空不绑定；例如 Ctrl+Alt+2")
         self.primary_action = QComboBox()
         self.secondary_action = QComboBox()
-        self.secondary_vision = QComboBox()
         self.trigger_duration = DurationInput(maximum_milliseconds=86_400_000)
         self.active_duration = DurationInput(maximum_milliseconds=86_400_000, allow_zero=False)
         self.rest_duration = DurationInput(maximum_milliseconds=86_400_000)
@@ -46,7 +44,6 @@ class ABFlowPage(QWidget):
         self.flow_list.currentRowChanged.connect(self._select_row)
         self.primary_action.currentIndexChanged.connect(self._refresh_preview)
         self.secondary_action.currentIndexChanged.connect(self._refresh_preview)
-        self.secondary_vision.currentIndexChanged.connect(self._refresh_preview)
         self.trigger_duration.value_changed.connect(self._refresh_preview)
         self.active_duration.value_changed.connect(self._refresh_preview)
         self.rest_duration.value_changed.connect(self._refresh_preview)
@@ -78,7 +75,6 @@ class ABFlowPage(QWidget):
         form.addRow("A：主要循环操作", self.primary_action)
         form.addRow("B：定时插入操作（可选）", self.secondary_action)
         form.addRow("B 触发时间", self.trigger_duration)
-        form.addRow("B 执行前识图确认（可选）", self.secondary_vision)
         form.addRow("本次运行总时长", self.active_duration)
         form.addRow("本次休息时长", self.rest_duration)
         form.addRow("周期次数", self.repeats)
@@ -109,10 +105,9 @@ class ABFlowPage(QWidget):
         self.preview.setVisible(visible)
         self.preview_toggle.setText("隐藏流程说明" if visible else "显示流程说明")
 
-    def set_data(self, workflows: list[WorkflowDefinition], actions: list[ActionDefinition], active_id: str, vision_presets: list[VisionPreset] | None = None) -> None:
+    def set_data(self, workflows: list[WorkflowDefinition], actions: list[ActionDefinition], active_id: str) -> None:
         self._workflows = workflows
         self._actions = actions
-        self._vision_presets = vision_presets or []
         self._active_id = active_id
         self._refresh_list()
 
@@ -166,7 +161,6 @@ class ABFlowPage(QWidget):
             self.hotkey_input,
             self.primary_action,
             self.secondary_action,
-            self.secondary_vision,
             self.trigger_duration,
             self.active_duration,
             self.rest_duration,
@@ -187,9 +181,6 @@ class ABFlowPage(QWidget):
             combo.blockSignals(False)
         self.primary_action.setCurrentIndex(max(0, self.primary_action.findData(flow.primary_action_id)))
         self.secondary_action.setCurrentIndex(max(0, self.secondary_action.findData(flow.secondary_action_id)))
-        self.secondary_vision.blockSignals(True); self.secondary_vision.clear(); self.secondary_vision.addItem("不需要识图确认", "")
-        for preset in self._vision_presets: self.secondary_vision.addItem(preset.name, preset.id)
-        self.secondary_vision.setCurrentIndex(max(0, self.secondary_vision.findData(flow.secondary_vision_preset_id))); self.secondary_vision.blockSignals(False)
 
     def _select_row(self, row: int) -> None:
         flows = self._flows()
@@ -220,8 +211,7 @@ class ABFlowPage(QWidget):
         lines = [f"1. 循环执行 A：“{primary}”。"]
         if self.secondary_action.currentData() and self.trigger_duration.milliseconds() > 0:
             lines.append(f"2. 从周期开始经过 {format_duration(self.trigger_duration.milliseconds())} 后，B 获得执行资格。")
-            if self.secondary_vision.currentData(): lines.append(f"3. 等待识图预设“{self.secondary_vision.currentText()}”确认；未确认则保持循环 A。")
-            lines += [f"4. 在安全边界暂停 A，执行 B：“{self.secondary_action.currentText()}”一次。", "5. B 完成后继续循环 A。"]
+            lines += [f"3. 在安全边界暂停 A，执行 B：“{self.secondary_action.currentText()}”一次。", "4. B 完成后继续循环 A。"]
         else:
             lines.append("2. 不插入 B，只持续循环 A。")
         completion = "到达时间后不再开始新操作；当前整次操作（含步骤后等待）完成后，再进入下一阶段。" if self.finish_current.isChecked() else "到达时间后不再开始后续步骤；当前单条 HID 命令完成后立即进入下一阶段。"
@@ -255,7 +245,6 @@ class ABFlowPage(QWidget):
         flow.primary_action_id = str(self.primary_action.currentData())
         flow.secondary_action_id = str(self.secondary_action.currentData() or "")
         flow.secondary_trigger_ms = self.trigger_duration.milliseconds()
-        flow.secondary_vision_preset_id = str(self.secondary_vision.currentData() or "")
         flow.active_duration_ms = self.active_duration.milliseconds()
         flow.rest_duration_ms = self.rest_duration.milliseconds()
         flow.repeats = self.repeats.value()

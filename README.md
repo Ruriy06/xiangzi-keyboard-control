@@ -1,7 +1,10 @@
-# 祥子的宝贝 · 键鼠自动化控制台
+# 祥子的宝贝 · 键鼠自动化控制台（无 AI 精简版）
 
 Arduino Leonardo 固件 + Windows 桌面软件，通过串口向单片机发送 HID 键盘/鼠标指令，
-实现可复用的按键操作、AB/自定义流程、OpenCV 模板识别与色块追踪钓鱼。
+实现可复用的按键操作、AB/自定义流程自动化。
+
+> 本分支为「无 AI 精简版」，已移除素材库 / 自定义 AI 识别 / 钓鱼（OpenCV 模板识别与色块追踪）。
+> 完整版（含 AI 识别）见 `main` 分支。
 
 ## 项目组成
 
@@ -11,10 +14,8 @@ MouseTo-master.zip          固件依赖的 Arduino 鼠标绝对坐标库
 desktop_app/                Windows 桌面软件（Python 3.14 + PySide6）
 ├─ main.py                  软件入口
 ├─ hid_control/             核心模块
-│  ├─ ui/                   界面页面（控制台、操作编辑、流程、AI识别、设置）
+│  ├─ ui/                   界面页面（控制台、操作编辑、AB流程、自定义流程、设置）
 │  ├─ workflow.py           流程执行器
-│  ├─ vision.py             模板识别服务
-│  ├─ fishing.py            色块追踪服务
 │  ├─ protocol.py           软件动作到固件命令的映射
 │  ├─ serial_service.py     COM 串口通信
 │  └─ storage.py            配置读写
@@ -23,7 +24,7 @@ desktop_app/                Windows 桌面软件（Python 3.14 + PySide6）
 └─ 启动软件.bat / .vbs      双击启动入口
 ```
 
-> `desktop_app/data/` 保存运行配置、素材与识别模板，属用户数据，不进入版本库。
+> `desktop_app/data/config.json` 保存运行配置（操作、流程、设备与全局控制设置），随版本库共享。
 
 ## 硬件
 
@@ -55,4 +56,3 @@ cd desktop_app
 - 单片机绝对坐标依赖 `MouseTo` 的软件位置记录；手动移动实体鼠标、多显示器或
   分辨率切换可能导致偏差。
 - 软件端流程等待不修改单片机基础按键/鼠标延迟。
-- 识别区域越小，截图、颜色转换与模板匹配的开销越低。

@@ -123,7 +123,7 @@ class WorkflowTests(unittest.TestCase):
             FlowStep(id="background", kind="action", action_id="A"),
             FlowStep(id="trigger", kind="action", action_id="B", trigger_type="time", trigger_after_ms=0, pause_target_step_ids=["background"]),
         ])
-        runner._run_flow_step(group, WorkflowDefinition(), {"A": action_a, "B": action_b}, time.monotonic() + 0.01, {})
+        runner._run_flow_step(group, WorkflowDefinition(), {"A": action_a, "B": action_b}, time.monotonic() + 0.01)
         self.assertEqual(serial.commands[0], "{B}")
         self.assertIn("{A}", serial.commands)
 
@@ -142,7 +142,7 @@ class WorkflowTests(unittest.TestCase):
         waits: list[int] = []
         runner._wait_until_stop_or_deadline = lambda milliseconds, deadline: waits.append(milliseconds)  # type: ignore[method-assign]
         step = FlowStep(kind="action", action_id="A", random_wait_min_ms=321, random_wait_max_ms=321)
-        runner._run_flow_step(step, WorkflowDefinition(), {"A": ActionDefinition(id="A", steps=[ActionStep(ActionKind.KEY_TAP, "A")])}, time.monotonic() + 1, {})
+        runner._run_flow_step(step, WorkflowDefinition(), {"A": ActionDefinition(id="A", steps=[ActionStep(ActionKind.KEY_TAP, "A")])}, time.monotonic() + 1)
         self.assertIn(321, waits)
         self.assertEqual(serial.commands, ["{A}"])
 
@@ -150,7 +150,7 @@ class WorkflowTests(unittest.TestCase):
         serial = FakeSerial()
         runner = WorkflowRunner(serial)  # type: ignore[arg-type]
         first = FlowStep(kind="action", action_id="A", children=[FlowStep(kind="action", action_id="B")])
-        runner._run_flow_step(first, WorkflowDefinition(), {"A": ActionDefinition(id="A", steps=[ActionStep(ActionKind.KEY_TAP, "A")]), "B": ActionDefinition(id="B", steps=[ActionStep(ActionKind.KEY_TAP, "B")])}, time.monotonic() + 1, {})
+        runner._run_flow_step(first, WorkflowDefinition(), {"A": ActionDefinition(id="A", steps=[ActionStep(ActionKind.KEY_TAP, "A")]), "B": ActionDefinition(id="B", steps=[ActionStep(ActionKind.KEY_TAP, "B")])}, time.monotonic() + 1)
         self.assertEqual(serial.commands, ["{A}", "{B}"])
 
     def test_tree_flow_runs_nested_steps_in_strict_order(self) -> None:
@@ -163,7 +163,7 @@ class WorkflowTests(unittest.TestCase):
             ]),
             FlowStep(kind="direct", direct_step=ActionStep(ActionKind.KEY_TAP, "C")),
         ])
-        runner._run_flow_step(root, WorkflowDefinition(finish_current_action=True), {}, time.monotonic() + 1, {})
+        runner._run_flow_step(root, WorkflowDefinition(finish_current_action=True), {}, time.monotonic() + 1)
         self.assertEqual(serial.commands, ["{A}", "{B}", "{C}"])
 
     def test_custom_flow_repeats_referenced_operation(self) -> None:
@@ -203,7 +203,7 @@ class WorkflowTests(unittest.TestCase):
             FlowBlock(kind="group", children=[FlowBlock(kind="direct", direct_step=ActionStep(ActionKind.KEY_TAP, "A"))]),
             FlowBlock(kind="loop", repeat_count=2, children=[FlowBlock(kind="direct", direct_step=ActionStep(ActionKind.KEY_TAP, "B"))]),
         ]
-        runner._run_block_sequence(blocks, WorkflowDefinition(finish_current_action=True), {}, time.monotonic() + 1, {})
+        runner._run_block_sequence(blocks, WorkflowDefinition(finish_current_action=True), {}, time.monotonic() + 1)
 
         self.assertEqual(serial.commands, ["{A}", "{B}", "{B}"])
 
@@ -214,7 +214,7 @@ class WorkflowTests(unittest.TestCase):
             FlowBlock(kind="direct", direct_step=ActionStep(ActionKind.KEY_TAP, "A")),
             FlowBlock(kind="group", enabled=False, children=[FlowBlock(kind="direct", direct_step=ActionStep(ActionKind.KEY_TAP, "B"))]),
         ]
-        runner._run_block_sequence(blocks, WorkflowDefinition(finish_current_action=True), {}, time.monotonic() + 1, {})
+        runner._run_block_sequence(blocks, WorkflowDefinition(finish_current_action=True), {}, time.monotonic() + 1)
         self.assertEqual(serial.commands, ["{A}"])
         restored = AppState.from_dict(AppState(workflows=[WorkflowDefinition(mode=FlowMode.CUSTOM, blocks=blocks)]).to_dict())
         self.assertFalse(restored.workflows[0].blocks[1].enabled)

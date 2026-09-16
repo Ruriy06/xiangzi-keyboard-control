@@ -56,7 +56,7 @@ class Dashboard(QWidget):
         self.log_view = QPlainTextEdit()
         self.log_view.setReadOnly(True)
         self.log_view.setMaximumBlockCount(500)
-        self.log_view.setPlaceholderText("设备、流程和识图状态会显示在这里")
+        self.log_view.setPlaceholderText("设备、流程状态会显示在这里")
 
         refresh_button = QPushButton("刷新端口")
         connect_button = QPushButton("连接设备")
@@ -81,7 +81,7 @@ class Dashboard(QWidget):
 
         title = QLabel("控制台")
         title.setObjectName("pageTitle")
-        subtitle = QLabel("选择任务、确认设备和素材状态后即可启动；高频日志保留最近 500 条，避免长期运行占用内存。")
+        subtitle = QLabel("选择任务、确认设备状态后即可启动；高频日志保留最近 500 条，避免长期运行占用内存。")
         subtitle.setObjectName("pageSubtitle")
         subtitle.setWordWrap(True)
 

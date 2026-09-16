@@ -10,7 +10,7 @@ from PySide6.QtWidgets import (
     QStackedWidget, QToolButton, QVBoxLayout, QWidget,
 )
 
-from ..models import ActionDefinition, FishingPreset, FlowMode, FlowStep, VisionPreset, WorkflowDefinition
+from ..models import ActionDefinition, FlowMode, FlowStep, WorkflowDefinition
 from .duration_input import DurationInput
 
 
@@ -19,13 +19,10 @@ STEP_TYPES = {
     "empty": ("未配置", "+", "#94a3b8"),
     "group": ("步骤组", "组", "#7c3aed"),
     "action": ("操作", "操", "#2563eb"),
-    "vision": ("识图", "识", "#0f766e"),
-    "fishing": ("钓鱼", "钓", "#b45309"),
 }
 RELATION_TYPES = {
     "immediate": ("直接进入", ">", "#64748b"),
     "time": ("延迟后进入", "时", "#d97706"),
-    "vision": ("识图确认后进入", "识", "#0f766e"),
     "step_complete": ("指定卡片完成后进入", "完", "#7c3aed"),
 }
 
@@ -87,7 +84,6 @@ class CustomFlowPage(QWidget):
     def __init__(self) -> None:
         super().__init__()
         self._workflows: list[WorkflowDefinition] = []; self._actions: list[ActionDefinition] = []
-        self._fishing_presets: list[FishingPreset] = []; self._vision_presets: list[VisionPreset] = []
         self._active_id = ""; self._selected_id = ""; self._selected_step_id = ""; self._selected_relation: tuple[str, str] | None = None
 
         self.flow_selector = QComboBox(); self.name_input = QLineEdit(); self.hotkey_input = QLineEdit(); self.run_once = QCheckBox("边界切换保护：等待当前操作完成再切换")
@@ -113,10 +109,10 @@ class CustomFlowPage(QWidget):
 
         self.step_title = QLineEdit(); self.step_enabled = QCheckBox("启用此卡片")
         self.step_kind = QComboBox(); self.step_kind.addItem("＋ 选择任务类型", "empty")
-        for kind in ("action", "vision", "fishing", "group"):
+        for kind in ("action", "group"):
             label, icon, _ = STEP_TYPES[kind]; self.step_kind.addItem(f"{icon} {label}", kind)
         self.group_mode = QComboBox(); self.group_mode.addItem("顺序执行子卡片", "sequential"); self.group_mode.addItem("调度执行子卡片", "scheduled")
-        self.action_combo = QComboBox(); self.vision_combo = QComboBox(); self.fishing_combo = QComboBox()
+        self.action_combo = QComboBox()
         self.repeat_mode = QComboBox(); self.repeat_mode.addItem("执行一次", "once"); self.repeat_mode.addItem("重复指定次数", "count"); self.repeat_mode.addItem("持续到时限", "duration"); self.repeat_mode.addItem("持续到手动停止", "forever")
         self.repeat_count = QSpinBox(); self.repeat_count.setRange(1, 100_000); self.limit = DurationInput(maximum_milliseconds=86_400_000, allow_zero=True)
         self.random_wait_min = DurationInput(maximum_milliseconds=86_400_000, allow_zero=True); self.random_wait_max = DurationInput(maximum_milliseconds=86_400_000, allow_zero=True)
@@ -124,17 +120,17 @@ class CustomFlowPage(QWidget):
         self.step_kind.currentIndexChanged.connect(self._update_card_editor); self.repeat_mode.currentIndexChanged.connect(self._update_card_editor)
         self.save_card.clicked.connect(self._save_card); self.copy_card.clicked.connect(self._copy_card); self.delete_card.clicked.connect(self._delete_card)
         self.card_editor = QFrame(); card_form = QFormLayout(self.card_editor)
-        card_form.addRow("卡片显示名称", self.step_title); card_form.addRow(self.step_enabled); card_form.addRow("卡片任务类型", self.step_kind); card_form.addRow("使用已保存操作", self.action_combo); card_form.addRow("使用识图预设", self.vision_combo); card_form.addRow("使用钓鱼预设", self.fishing_combo); card_form.addRow("步骤组方式", self.group_mode); card_form.addRow("此卡片的执行方式", self.repeat_mode); card_form.addRow("重复次数", self.repeat_count); card_form.addRow("此卡片最长运行时间", self.limit); card_form.addRow("执行前随机等待（最小）", self.random_wait_min); card_form.addRow("执行前随机等待（最大）", self.random_wait_max)
+        card_form.addRow("卡片显示名称", self.step_title); card_form.addRow(self.step_enabled); card_form.addRow("卡片任务类型", self.step_kind); card_form.addRow("使用已保存操作", self.action_combo); card_form.addRow("步骤组方式", self.group_mode); card_form.addRow("此卡片的执行方式", self.repeat_mode); card_form.addRow("重复次数", self.repeat_count); card_form.addRow("此卡片最长运行时间", self.limit); card_form.addRow("执行前随机等待（最小）", self.random_wait_min); card_form.addRow("执行前随机等待（最大）", self.random_wait_max)
         card_buttons = QHBoxLayout(); card_buttons.addWidget(self.save_card); card_buttons.addWidget(self.copy_card); card_buttons.addWidget(self.delete_card); card_form.addRow(card_buttons)
 
         self.relation_type = QComboBox()
         for key, (label, icon, _color) in RELATION_TYPES.items(): self.relation_type.addItem(f"{icon} {label}", key)
-        self.relation_delay = DurationInput(maximum_milliseconds=86_400_000, allow_zero=True); self.relation_vision = QComboBox(); self.relation_step = QComboBox()
+        self.relation_delay = DurationInput(maximum_milliseconds=86_400_000, allow_zero=True); self.relation_step = QComboBox()
         self.pause_targets = QListWidget(); self.pause_targets.setSelectionMode(QAbstractItemView.SelectionMode.MultiSelection); self.pause_targets.setMaximumHeight(100)
         self.resume_paused = QCheckBox("当前处理完成后，恢复被暂停的卡片"); self.resume_paused.setToolTip("关闭后，目标卡片会保持暂停，直到流程结束或被后续关系重新启用。"); self.resume_paused.setChecked(True); self.save_relation = QPushButton("保存箭头关系")
         self.relation_type.currentIndexChanged.connect(self._update_relation_editor); self.save_relation.clicked.connect(self._save_relation)
         self.relation_editor = QFrame(); relation_form = QFormLayout(self.relation_editor)
-        relation_form.addRow("进入此卡片的条件", self.relation_type); relation_form.addRow("延迟多久后进入", self.relation_delay); relation_form.addRow("使用哪个识图确认", self.relation_vision); relation_form.addRow("等待哪张卡片完成", self.relation_step); relation_form.addRow("进入前暂停哪些卡片", self.pause_targets); relation_form.addRow(self.resume_paused); relation_form.addRow(self.save_relation)
+        relation_form.addRow("进入此卡片的条件", self.relation_type); relation_form.addRow("延迟多久后进入", self.relation_delay); relation_form.addRow("等待哪张卡片完成", self.relation_step); relation_form.addRow("进入前暂停哪些卡片", self.pause_targets); relation_form.addRow(self.resume_paused); relation_form.addRow(self.save_relation)
 
         self.editor_stack = QStackedWidget(); self.editor_stack.addWidget(self.card_editor); self.editor_stack.addWidget(self.relation_editor)
         top = QHBoxLayout(); top.addWidget(QLabel("当前自定义流程")); top.addWidget(self.flow_selector, 1)
@@ -149,8 +145,8 @@ class CustomFlowPage(QWidget):
         layout = QVBoxLayout(self); layout.addLayout(top); layout.addLayout(body, 1)
         self._set_editors(False)
 
-    def set_data(self, workflows: list[WorkflowDefinition], actions: list[ActionDefinition], active_id: str, fishing_presets: list[FishingPreset] | None = None, vision_presets: list[VisionPreset] | None = None) -> None:
-        self._workflows, self._actions, self._active_id = workflows, actions, active_id; self._fishing_presets, self._vision_presets = fishing_presets or [], vision_presets or []; self._refresh_flows()
+    def set_data(self, workflows: list[WorkflowDefinition], actions: list[ActionDefinition], active_id: str) -> None:
+        self._workflows, self._actions, self._active_id = workflows, actions, active_id; self._refresh_flows()
     def _flows(self) -> list[WorkflowDefinition]: return [item for item in self._workflows if item.mode == FlowMode.CUSTOM]
     def _current(self) -> WorkflowDefinition | None: return next((item for item in self._workflows if item.id == self._selected_id), None)
     def _root(self, create: bool = False) -> FlowStep | None:
@@ -186,30 +182,25 @@ class CustomFlowPage(QWidget):
         self.lock_button.setEnabled(True); self.lock_button.setText("已锁定 · 点击解锁" if flow.locked else "锁定流程")
         self.lock_button.setStyleSheet("QPushButton { color:#5b4b75; background:#f1edf7; border:1px solid #c4b5d8; border-radius:6px; padding:4px 9px; }" if flow.locked else "QPushButton { color:#36546f; background:#f5f8fb; border:1px solid #b9cad9; border-radius:6px; padding:4px 9px; } QPushButton:hover { background:#e8f0f7; border-color:#6b8aa5; }")
     def _refresh_references(self) -> None:
-        for combo, values, placeholder in ((self.action_combo, self._actions, "请选择已保存操作"), (self.vision_combo, self._vision_presets, "请选择识图预设"), (self.fishing_combo, self._fishing_presets, "请选择钓鱼预设")):
+        for combo, values, placeholder in ((self.action_combo, self._actions, "请选择已保存操作"),):
             combo.blockSignals(True); combo.clear(); combo.addItem(placeholder, "")
             for item in values: combo.addItem(item.name, item.id)
             combo.blockSignals(False)
-        self.relation_vision.blockSignals(True); self.relation_vision.clear(); self.relation_vision.addItem("请选择识图预设", "")
-        for item in self._vision_presets: self.relation_vision.addItem(item.name, item.id)
-        self.relation_vision.blockSignals(False); self.relation_step.blockSignals(True); self.relation_step.clear(); self.relation_step.addItem("请选择前置卡片", "")
+        self.relation_step.blockSignals(True); self.relation_step.clear(); self.relation_step.addItem("请选择前置卡片", "")
         for item in self._walk():
             if item is not self._root(): self.relation_step.addItem(self._title(item), item.id)
         self.relation_step.blockSignals(False)
     def _title(self, step: FlowStep) -> str:
         if step.title and step.title != "未配置卡片": return step.title
         if step.kind == "action": return next((item.name for item in self._actions if item.id == step.action_id), "未选择操作")
-        if step.kind == "vision": return next((item.name for item in self._vision_presets if item.id == step.vision_preset_id), "未选择识图预设")
-        if step.kind == "fishing": return next((item.name for item in self._fishing_presets if item.id == step.fishing_preset_id), "未选择钓鱼预设")
         return STEP_TYPES.get(step.kind, STEP_TYPES['empty'])[0]
     def _detail(self, step: FlowStep) -> str:
-        if step.kind == "empty": return "点击此卡片，在右侧选择操作、识图预设或钓鱼预设"
+        if step.kind == "empty": return "点击此卡片，在右侧选择操作或步骤组"
         if step.kind == "group": return "顺序步骤组" if step.group_mode == "sequential" else "调度步骤组"
         return STEP_TYPES.get(step.kind, STEP_TYPES['empty'])[0] + "任务"
     def _relation_text(self, step: FlowStep) -> tuple[str, str, str]:
         label, icon, color = RELATION_TYPES.get(step.trigger_type, RELATION_TYPES['immediate'])
         if step.trigger_type == "time": label = f"等待 {step.trigger_after_ms / 1000:g} 秒后"
-        elif step.trigger_type == "vision": label = "识图匹配后"
         elif step.trigger_type == "step_complete": label = "指定卡片完成后"
         if step.pause_target_step_ids: label += f" · 暂停 {len(step.pause_target_step_ids)} 张卡片"
         return label, icon, color
@@ -268,34 +259,32 @@ class CustomFlowPage(QWidget):
         if not step or not flow: return
         self.object_title.setText(f"卡片：{self._title(step)}"); self.editor_stack.setCurrentWidget(self.card_editor); self._set_editors(not flow.locked)
         self.step_title.setText("" if step.title == "未配置卡片" else step.title); self.step_enabled.setChecked(step.enabled); self.step_kind.setCurrentIndex(max(0, self.step_kind.findData(step.kind)))
-        self.action_combo.setCurrentIndex(max(0, self.action_combo.findData(step.action_id))); self.vision_combo.setCurrentIndex(max(0, self.vision_combo.findData(step.vision_preset_id))); self.fishing_combo.setCurrentIndex(max(0, self.fishing_combo.findData(step.fishing_preset_id))); self.group_mode.setCurrentIndex(max(0, self.group_mode.findData(step.group_mode))); self.repeat_mode.setCurrentIndex(max(0, self.repeat_mode.findData(step.repeat_mode))); self.repeat_count.setValue(step.repeat_count); self.limit.set_milliseconds(step.limit_ms); self.random_wait_min.set_milliseconds(step.random_wait_min_ms); self.random_wait_max.set_milliseconds(step.random_wait_max_ms); self._update_card_editor()
+        self.action_combo.setCurrentIndex(max(0, self.action_combo.findData(step.action_id))); self.group_mode.setCurrentIndex(max(0, self.group_mode.findData(step.group_mode))); self.repeat_mode.setCurrentIndex(max(0, self.repeat_mode.findData(step.repeat_mode))); self.repeat_count.setValue(step.repeat_count); self.limit.set_milliseconds(step.limit_ms); self.random_wait_min.set_milliseconds(step.random_wait_min_ms); self.random_wait_max.set_milliseconds(step.random_wait_max_ms); self._update_card_editor()
     def _load_relation(self) -> None:
         if not self._selected_relation: return
         source = self._step(self._selected_relation[0]); target = self._step(self._selected_relation[1]); flow = self._current()
         if not source or not target or not flow: return
         self.object_title.setText(f"关系：{self._title(source)}  →  {self._title(target)}"); self.editor_stack.setCurrentWidget(self.relation_editor); self._set_editors(not flow.locked)
-        self.relation_type.setCurrentIndex(max(0, self.relation_type.findData(target.trigger_type))); self.relation_delay.set_milliseconds(target.trigger_after_ms); self.relation_vision.setCurrentIndex(max(0, self.relation_vision.findData(target.trigger_vision_preset_id))); self.relation_step.setCurrentIndex(max(0, self.relation_step.findData(target.trigger_step_id))); self.resume_paused.setChecked(target.resume_paused)
+        self.relation_type.setCurrentIndex(max(0, self.relation_type.findData(target.trigger_type))); self.relation_delay.set_milliseconds(target.trigger_after_ms); self.relation_step.setCurrentIndex(max(0, self.relation_step.findData(target.trigger_step_id))); self.resume_paused.setChecked(target.resume_paused)
         self.pause_targets.clear()
         for candidate in self._walk():
             if candidate.id in {target.id, self._root().id}: continue
             item = QListWidgetItem(self._title(candidate)); item.setData(Qt.ItemDataRole.UserRole, candidate.id); item.setSelected(candidate.id in target.pause_target_step_ids); self.pause_targets.addItem(item)
         self._update_relation_editor()
     def _update_card_editor(self) -> None:
-        kind = str(self.step_kind.currentData() or "empty"); self.action_combo.setVisible(kind == "action"); self.vision_combo.setVisible(kind == "vision"); self.fishing_combo.setVisible(kind == "fishing"); self.group_mode.setVisible(kind == "group"); self.repeat_count.setVisible(self.repeat_mode.currentData() == "count")
+        kind = str(self.step_kind.currentData() or "empty"); self.action_combo.setVisible(kind == "action"); self.group_mode.setVisible(kind == "group"); self.repeat_count.setVisible(self.repeat_mode.currentData() == "count")
     def _update_relation_editor(self) -> None:
-        kind = str(self.relation_type.currentData() or "immediate"); self.relation_delay.setVisible(kind == "time"); self.relation_vision.setVisible(kind == "vision"); self.relation_step.setVisible(kind == "step_complete")
+        kind = str(self.relation_type.currentData() or "immediate"); self.relation_delay.setVisible(kind == "time"); self.relation_step.setVisible(kind == "step_complete")
     def _save_card(self) -> None:
         step = self._step(); flow = self._current()
         if not step or not flow or flow.locked: return
-        old_kind = step.kind; step.kind = str(self.step_kind.currentData()); step.enabled = self.step_enabled.isChecked(); step.action_id = str(self.action_combo.currentData() or ""); step.vision_preset_id = str(self.vision_combo.currentData() or ""); step.fishing_preset_id = str(self.fishing_combo.currentData() or ""); step.group_mode = str(self.group_mode.currentData()); step.repeat_mode = str(self.repeat_mode.currentData()); step.repeat_count = self.repeat_count.value(); step.limit_ms = self.limit.milliseconds(); step.random_wait_min_ms = self.random_wait_min.milliseconds(); step.random_wait_max_ms = self.random_wait_max.milliseconds()
+        old_kind = step.kind; step.kind = str(self.step_kind.currentData()); step.enabled = self.step_enabled.isChecked(); step.action_id = str(self.action_combo.currentData() or ""); step.group_mode = str(self.group_mode.currentData()); step.repeat_mode = str(self.repeat_mode.currentData()); step.repeat_count = self.repeat_count.value(); step.limit_ms = self.limit.milliseconds(); step.random_wait_min_ms = self.random_wait_min.milliseconds(); step.random_wait_max_ms = self.random_wait_max.milliseconds()
         if step.random_wait_min_ms > step.random_wait_max_ms:
             step.random_wait_min_ms, step.random_wait_max_ms = step.random_wait_max_ms, step.random_wait_min_ms
             self._feedback("随机等待范围已自动调整为最小值到最大值", "#d97706")
         explicit = self.step_title.text().strip()
         if explicit: step.title = explicit
         elif step.kind == "action": step.title = next((item.name for item in self._actions if item.id == step.action_id), "未选择操作")
-        elif step.kind == "vision": step.title = next((item.name for item in self._vision_presets if item.id == step.vision_preset_id), "未选择识图预设")
-        elif step.kind == "fishing": step.title = next((item.name for item in self._fishing_presets if item.id == step.fishing_preset_id), "未选择钓鱼预设")
         elif step.kind == "empty": step.title = "未配置卡片"
         elif not step.title: step.title = "步骤组"
         self._feedback("已保存卡片", "#16a34a"); self._refresh_references(); self._refresh_cards(); self.workflows_changed.emit()
@@ -303,7 +292,7 @@ class CustomFlowPage(QWidget):
         if not self._selected_relation: return
         target = self._step(self._selected_relation[1]); flow = self._current()
         if not target or not flow or flow.locked: return
-        target.trigger_type = str(self.relation_type.currentData()); target.trigger_after_ms = self.relation_delay.milliseconds(); target.trigger_vision_preset_id = str(self.relation_vision.currentData() or ""); target.trigger_step_id = str(self.relation_step.currentData() or ""); target.pause_target_step_ids = [self.pause_targets.item(index).data(Qt.ItemDataRole.UserRole) for index in range(self.pause_targets.count()) if self.pause_targets.item(index).isSelected()]; target.resume_paused = self.resume_paused.isChecked()
+        target.trigger_type = str(self.relation_type.currentData()); target.trigger_after_ms = self.relation_delay.milliseconds(); target.trigger_step_id = str(self.relation_step.currentData() or ""); target.pause_target_step_ids = [self.pause_targets.item(index).data(Qt.ItemDataRole.UserRole) for index in range(self.pause_targets.count()) if self.pause_targets.item(index).isSelected()]; target.resume_paused = self.resume_paused.isChecked()
         self._feedback("已保存箭头关系", "#d97706"); self._refresh_cards(); self.workflows_changed.emit()
     def _copy_card(self) -> None:
         step = self._step(); parent, index = self._parent_index(self._selected_step_id); flow = self._current()

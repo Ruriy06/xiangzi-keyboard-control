@@ -44,10 +44,6 @@ class DashboardTests(unittest.TestCase):
         self.assertEqual(dashboard.preflight_label.text(), "检查通过")
         self.assertEqual(dashboard.preflight_label.property("level"), "success")
 
-    def test_presentation_refresh_limiter_only_controls_ui_updates(self) -> None:
-        self.assertFalse(MainWindow._presentation_refresh_due(10.0, 10.11))
-        self.assertTrue(MainWindow._presentation_refresh_due(10.0, 10.13))
-
     def test_log_view_keeps_user_scroll_position_when_reading_history(self) -> None:
         dashboard = Dashboard()
         dashboard.resize(400, 180)
@@ -62,8 +58,8 @@ class DashboardTests(unittest.TestCase):
         dashboard.close()
 
     def test_checkbox_display_text_makes_selection_explicit(self) -> None:
-        self.assertEqual(MainWindow._checkbox_display_text("启用钓鱼识别", False), "○ 未选 · 启用钓鱼识别")
-        self.assertEqual(MainWindow._checkbox_display_text("启用钓鱼识别", True), "✓ 已选 · 启用钓鱼识别")
+        self.assertEqual(MainWindow._checkbox_display_text("启用边界切换保护", False), "○ 未选 · 启用边界切换保护")
+        self.assertEqual(MainWindow._checkbox_display_text("启用边界切换保护", True), "✓ 已选 · 启用边界切换保护")
 
     def test_settings_theme_selector_emits_and_loads_saved_value(self) -> None:
         page = SettingsPage()
