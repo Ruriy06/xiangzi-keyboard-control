@@ -37,11 +37,18 @@ def _choose_start_mode() -> bool:
     return dialog.clickedButton() is normal_button and dialog.clickedButton() is not cancel_button
 
 
+def _resource_path(name: str) -> Path:
+    """返回随程序分发的资源路径；打包后从解压目录读取。"""
+    if getattr(sys, "frozen", False):
+        return Path(getattr(sys, "_MEIPASS", Path(sys.executable).parent)) / name
+    return Path(__file__).resolve().parents[2] / name
+
+
 def run() -> int:
     application = QApplication(sys.argv)
     # Windows 11 中文界面统一使用系统可用的微软雅黑 UI，避免键盘选择器标签乱码。
     application.setFont(QFont("Microsoft YaHei UI", 10))
-    icon_path = Path(__file__).resolve().parents[2] / "xiangzi.png"
+    icon_path = _resource_path("xiangzi.png")
     if icon_path.exists():
         application.setWindowIcon(QIcon(str(icon_path)))
     application.setApplicationName(APP_NAME)

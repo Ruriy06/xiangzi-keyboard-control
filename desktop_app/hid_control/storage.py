@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import sys
 from pathlib import Path
 
 from .models import AppState
@@ -8,7 +9,13 @@ from .models import AppState
 
 class SettingsStore:
     def __init__(self, config_path: Path | None = None) -> None:
-        self.config_path = config_path or Path(__file__).resolve().parents[1] / "data" / "config.json"
+        if config_path is not None:
+            self.config_path = config_path
+        elif getattr(sys, "frozen", False):
+            # 打包环境：配置写到可执行文件旁的 data 目录，避免每次运行丢失。
+            self.config_path = Path(sys.executable).resolve().parent / "data" / "config.json"
+        else:
+            self.config_path = Path(__file__).resolve().parents[1] / "data" / "config.json"
 
     def load(self) -> AppState:
         if not self.config_path.exists():
