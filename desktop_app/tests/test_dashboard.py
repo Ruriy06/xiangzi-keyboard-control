@@ -29,6 +29,21 @@ class DashboardTests(unittest.TestCase):
         self.assertEqual(dashboard.target_combo.currentData(), ("action", "A"))
         self.assertIn("操作：操作 A", dashboard.target_combo.currentText())
 
+    def test_dashboard_shows_hid_description_without_device_path_prefix(self) -> None:
+        """HID 迁移回归：device 是上百字符的设备路径，不能直接拼进下拉框显示文本。"""
+        from hid_control.hid_service import PortInfo
+
+        dashboard = Dashboard()
+        path = "\\\\?\\HID#VID_046A&PID_0001&Col03#9&2b8005e8&0&0002#{4d1e55b2-f16f-11cf-88cb-001111000030}"
+        dashboard.set_ports([PortInfo(path, "USB Keyboard（VID:0x046A PID:0x0001，接口 0）", "HID VID:PID=046A:0001")])
+        self.assertEqual(dashboard.port_combo.count(), 1)
+        self.assertEqual(dashboard.port_combo.currentText(), "USB Keyboard（VID:0x046A PID:0x0001，接口 0）")
+        self.assertNotIn("HID#", dashboard.port_combo.currentText())
+        # 路径仍作为 item data 保留，connect() 依赖它
+        self.assertEqual(dashboard.port_combo.currentData(), path)
+        # 完整路径放进悬浮提示，保留多台同型设备时的区分信息
+        self.assertEqual(dashboard.port_combo.itemData(0, Qt.ItemDataRole.ToolTipRole), path)
+
     def test_keyboard_workspace_uses_outer_editor_scroll_and_full_height(self) -> None:
         panel = StepInputPanel(keyboard_height=300)
         panel.kind_combo.setCurrentIndex(panel.kind_combo.findData(ActionKind.KEY_TAP))
@@ -76,11 +91,11 @@ class DashboardTests(unittest.TestCase):
         state = AppState(actions=[ActionDefinition(id="A", name="操作", steps=[ActionStep(ActionKind.KEY_TAP, "A")])], active_target_kind="action", active_target_id="A")
         window = type("PreflightWindow", (), {})()
         window._state = state
-        window._serial = type("Serial", (), {"is_connected": True})()
+        window._hid = type("Serial", (), {"is_connected": True})()
         window.dashboard = Dashboard()
         window._log = lambda _message: None
         self.assertTrue(MainWindow._run_preflight(window))
-        window._serial.is_connected = False
+        window._hid.is_connected = False
         self.assertFalse(MainWindow._run_preflight(window))
 
 

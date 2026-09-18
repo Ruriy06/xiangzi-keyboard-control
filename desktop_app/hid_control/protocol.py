@@ -21,7 +21,7 @@ class ProtocolError(ValueError):
 def wrapped(command: str) -> str:
     command = command.strip().strip("{}")
     if not command or len(command) > 61:
-        raise ProtocolError("串口命令不能为空且内容不能超过 61 个字符")
+        raise ProtocolError("设备命令不能为空且内容不能超过 61 个字符")
     return "{" + command + "}"
 
 

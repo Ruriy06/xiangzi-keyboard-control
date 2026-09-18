@@ -9,7 +9,7 @@ from PySide6.QtCore import QObject, Signal
 
 from .models import ActionDefinition, ActionKind, CustomFlowStep, CustomStepKind, FlowBlock, FlowMode, FlowStep, LinearTask, WorkflowDefinition
 from .protocol import ProtocolError, command_for_step, wait_milliseconds
-from .serial_service import SerialService
+from .hid_service import HidService
 from .ui.duration_input import format_duration
 
 
@@ -18,9 +18,9 @@ class WorkflowRunner(QObject):
     log_message = Signal(str)
     finished = Signal()
 
-    def __init__(self, serial_service: SerialService) -> None:
+    def __init__(self, hid_service: HidService) -> None:
         super().__init__()
-        self._serial_service = serial_service
+        self._hid_service = hid_service
         self._stop_event = threading.Event()
         self._thread: threading.Thread | None = None
         self._state_lock = threading.Lock()
@@ -48,7 +48,7 @@ class WorkflowRunner(QObject):
             if workflow.mode == FlowMode.CUSTOM and not (workflow.root_step and workflow.root_step.children) and not (workflow.tasks or workflow.blocks or workflow.custom_steps):
                 self.log_message.emit("请至少为自动化流程添加一个流程步骤")
                 return False
-            if not self._serial_service.is_connected:
+            if not self._hid_service.is_connected:
                 self.log_message.emit("设备未连接，无法启动流程")
                 return False
             self._stop_event.clear()
@@ -65,7 +65,7 @@ class WorkflowRunner(QObject):
             if self.is_running:
                 self.log_message.emit("已有任务正在运行")
                 return False
-            if not self._serial_service.is_connected:
+            if not self._hid_service.is_connected:
                 self.log_message.emit("设备未连接，无法启动操作")
                 return False
             self._stop_event.clear()
@@ -82,7 +82,7 @@ class WorkflowRunner(QObject):
             if self.is_running:
                 self.log_message.emit("已有任务正在运行")
                 return False
-            if not self._serial_service.is_connected:
+            if not self._hid_service.is_connected:
                 self.log_message.emit("设备未连接，无法执行操作")
                 return False
             self._stop_event.clear()
@@ -93,7 +93,7 @@ class WorkflowRunner(QObject):
 
     def stop(self) -> None:
         self._stop_event.set()
-        self._serial_service.send_stop()
+        self._hid_service.send_stop()
         self.status_changed.emit("正在停止…")
 
     def _run_action_once(self, action: ActionDefinition) -> None:
@@ -108,7 +108,7 @@ class WorkflowRunner(QObject):
         except Exception as error:
             self.log_message.emit(f"操作异常：{error}")
         finally:
-            self._serial_service.send_stop()
+            self._hid_service.send_stop()
             self._active_target = ""
             self.status_changed.emit("已停止")
             self.finished.emit()
@@ -126,7 +126,7 @@ class WorkflowRunner(QObject):
         except Exception as error:
             self.log_message.emit(f"操作异常：{error}")
         finally:
-            self._serial_service.send_stop()
+            self._hid_service.send_stop()
             self._active_target = ""
             self.status_changed.emit("已停止")
             self.finished.emit()
@@ -173,7 +173,7 @@ class WorkflowRunner(QObject):
         except Exception as error:
             self.log_message.emit(f"流程异常：{error}")
         finally:
-            self._serial_service.send_stop()
+            self._hid_service.send_stop()
             self._active_target = ""
             self.status_changed.emit("已停止")
             self.finished.emit()
@@ -457,8 +457,8 @@ class WorkflowRunner(QObject):
             self._wait_until_stop_or_deadline(wait_milliseconds(step), deadline)
             return
         command = command_for_step(step)
-        if command is not None and not self._serial_service.send(command):
-            raise RuntimeError("串口命令未发送成功")
+        if command is not None and not self._hid_service.send(command):
+            raise RuntimeError("设备命令未发送成功")
         self._wait_until_stop_or_deadline(step.delay_after_ms, deadline)
 
     def _wait_until_stop_or_deadline(self, milliseconds: int, deadline: float | None) -> None:

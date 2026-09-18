@@ -173,7 +173,7 @@ class StepInputPanel(QWidget):
     def _raw_page(self) -> QWidget:
         page = QWidget()
         form = QFormLayout(page)
-        form.addRow("原始串口命令", self.raw_input)
+        form.addRow("原始设备命令", self.raw_input)
         return page
 
     def _use_wheel_shortcut(self, amount: int) -> None:

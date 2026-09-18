@@ -4,7 +4,12 @@ import sys
 import traceback
 from pathlib import Path
 
-from hid_control.app import run
+# 先应用 CPU-only 软件渲染策略，再导入任何 Qt 相关模块。
+from hid_control.runtime_policy import apply_software_render_environment
+
+apply_software_render_environment()
+
+from hid_control.app import run  # noqa: E402  （必须晚于渲染策略）
 
 
 def _base_dir() -> Path:

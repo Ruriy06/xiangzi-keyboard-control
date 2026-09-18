@@ -3,6 +3,7 @@
 #include "Keyboard.h"
 #include "Mouse.h"
 #include "MouseTo.h"
+#include "hid_link.h"   // Link：CDC 开时即 CDC 串口，CDC 关时走 HID 通道（阶段 C-4）
 
 #define SERIAL_BAUD_RATE    115200
 #define MAX_MODIFIERS        3
@@ -131,42 +132,42 @@ void resetConfig() {
 }
 
 void sendError(const char* code) {
-  Serial.print("{ERR:");
-  Serial.print(code);
-  Serial.println("}");
+  Link.print("{ERR:");
+  Link.print(code);
+  Link.println("}");
 }
 
 void sendConfig() {
-  Serial.print("{CFG:SCREEN=");
-  Serial.print(screenW);
-  Serial.print("x");
-  Serial.print(screenH);
-  Serial.println("}");
-  Serial.print("{CFG:KEY_PRESS_BASE=");
-  Serial.print(keyPressDelay);
-  Serial.println("}");
-  Serial.println("{CFG:KEY_PRESS_JITTER=-5..5}");
-  Serial.print("{CFG:KEY_RELEASE_BASE=");
-  Serial.print(keyReleaseDelay);
-  Serial.println("}");
-  Serial.println("{CFG:KEY_RELEASE_JITTER=-3..3}");
-  Serial.print("{CFG:COMBO_MODIFIER_HOLD=");
-  Serial.print(keyHoldDelay);
-  Serial.println("}");
-  Serial.print("{CFG:MOUSE_PRESS_BASE=");
-  Serial.print(mousePressDelay);
-  Serial.println("}");
-  Serial.print("{CFG:MOUSE_CLICK_GAP=");
-  Serial.print(mouseClickDelay);
-  Serial.println("}");
-  Serial.print("{CFG:MOUSE_MOVE_GAP=");
-  Serial.print(mouseMoveDelay);
-  Serial.println("}");
-  Serial.print("{CFG:MOUSE_MAX_JUMP=");
-  Serial.print(mouseMaxJump);
-  Serial.println("}");
-  Serial.println("{CFG:MC_TIMING=PRESS_10..30,GAP_20..40}");
-  Serial.println("{CFG:MCR_TIMING=PRESS_30..50,GAP_40..80}");
+  Link.print("{CFG:SCREEN=");
+  Link.print(screenW);
+  Link.print("x");
+  Link.print(screenH);
+  Link.println("}");
+  Link.print("{CFG:KEY_PRESS_BASE=");
+  Link.print(keyPressDelay);
+  Link.println("}");
+  Link.println("{CFG:KEY_PRESS_JITTER=-5..5}");
+  Link.print("{CFG:KEY_RELEASE_BASE=");
+  Link.print(keyReleaseDelay);
+  Link.println("}");
+  Link.println("{CFG:KEY_RELEASE_JITTER=-3..3}");
+  Link.print("{CFG:COMBO_MODIFIER_HOLD=");
+  Link.print(keyHoldDelay);
+  Link.println("}");
+  Link.print("{CFG:MOUSE_PRESS_BASE=");
+  Link.print(mousePressDelay);
+  Link.println("}");
+  Link.print("{CFG:MOUSE_CLICK_GAP=");
+  Link.print(mouseClickDelay);
+  Link.println("}");
+  Link.print("{CFG:MOUSE_MOVE_GAP=");
+  Link.print(mouseMoveDelay);
+  Link.println("}");
+  Link.print("{CFG:MOUSE_MAX_JUMP=");
+  Link.print(mouseMaxJump);
+  Link.println("}");
+  Link.println("{CFG:MC_TIMING=PRESS_10..30,GAP_20..40}");
+  Link.println("{CFG:MCR_TIMING=PRESS_30..50,GAP_40..80}");
 }
 
 bool parseIntStrict(const char* text, int& value) {
@@ -202,7 +203,7 @@ bool setConfigValue(const char* cmd, const char* prefix, uint8_t& setting, int m
   }
 
   setting = (uint8_t)value;
-  Serial.println("{OK:CFG}");
+  Link.println("{OK:CFG}");
   return true;
 }
 
@@ -211,7 +212,7 @@ void handleConfigCommand(const char* cmd) {
     sendConfig();
   } else if (strcmp(cmd, "CFG_RESET") == 0) {
     resetConfig();
-    Serial.println("{OK:CFG_RESET}");
+    Link.println("{OK:CFG_RESET}");
   } else if (setConfigValue(cmd, "CFG_KEY_PRESS_", keyPressDelay, 0, CFG_DELAY_MAX)) {
   } else if (setConfigValue(cmd, "CFG_KEY_RELEASE_", keyReleaseDelay, 0, CFG_DELAY_MAX)) {
   } else if (setConfigValue(cmd, "CFG_COMBO_HOLD_", keyHoldDelay, 0, CFG_DELAY_MAX)) {
@@ -225,7 +226,7 @@ void handleConfigCommand(const char* cmd) {
     } else {
       mouseMaxJump = (uint8_t)value;
       MouseTo.setMaxJump(mouseMaxJump);
-      Serial.println("{OK:CFG}");
+      Link.println("{OK:CFG}");
     }
   } else {
     sendError("CFG_CMD");
@@ -234,11 +235,11 @@ void handleConfigCommand(const char* cmd) {
 
 void handleScreenCommand(const char* cmd) {
   if (strcmp(cmd, "SCR_GET") == 0) {
-    Serial.print("{SCR:");
-    Serial.print(screenW);
-    Serial.print("x");
-    Serial.print(screenH);
-    Serial.println("}");
+    Link.print("{SCR:");
+    Link.print(screenW);
+    Link.print("x");
+    Link.print(screenH);
+    Link.println("}");
     return;
   }
 
@@ -252,7 +253,7 @@ void handleScreenCommand(const char* cmd) {
   screenW = width;
   screenH = height;
   MouseTo.setScreenResolution(screenW, screenH);
-  Serial.println("{OK:SCR}");
+  Link.println("{OK:SCR}");
 }
 
 void delayWithJitter(int baseDelay, int minJitter, int maxJitter) {
@@ -414,7 +415,7 @@ unsigned long lastCmdTime = 0;
 void setup() {
   Keyboard.begin();
   Mouse.begin();
-  Serial.begin(SERIAL_BAUD_RATE);
+  Link.begin(SERIAL_BAUD_RATE);
   resetConfig();
   lastCmdTime = millis();
   delay(500);
@@ -434,8 +435,8 @@ void loop() {
     stopFlag = true;
   }
 
-  while (Serial.available()) {
-    char c = Serial.read();
+  while (Link.available()) {
+    char c = Link.read();
     lastCmdTime = millis();  // 有串口数据就刷新, 防止正常间隔触发超时
     if (c == '\n' || c == '\r') {
       if (cmdLen > 0) {
@@ -453,7 +454,7 @@ void loop() {
             checksumOK = (expected == actual);
           }
           if (!checksumOK) {
-            Serial.println("{NACK}");
+            Link.println("{NACK}");
             cmdLen = 0; memset(cmdBuffer, 0, sizeof(cmdBuffer));
             continue;
           }
@@ -465,8 +466,8 @@ void loop() {
           char* cmd = cmdBuffer + 1;
           stopFlag = false;
           lastCmdTime = millis();
-          Serial.print("CMD:");
-          Serial.println(cmd);
+          Link.print("CMD:");
+          Link.println(cmd);
 
           // 命令分发: 优先匹配前缀(MC_/MCR_/MOVE) 和全名, 最后回退到 keyMap
 
@@ -578,8 +579,8 @@ void loop() {
           cmdLen = 0;
           memset(cmdBuffer, 0, sizeof(cmdBuffer));
         } else {
-          Serial.print("BAD:");
-          Serial.println(cmdBuffer);
+          Link.print("BAD:");
+          Link.println(cmdBuffer);
           cmdLen = 0;
           memset(cmdBuffer, 0, sizeof(cmdBuffer));
         }

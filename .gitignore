@@ -4,6 +4,8 @@ jianshu.7z
 arduino-ide*.exe
 *.exe
 build/
+build_new/
+dist/
 .narrafork/
 
 # Python

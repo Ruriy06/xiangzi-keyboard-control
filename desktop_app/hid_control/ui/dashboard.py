@@ -14,8 +14,8 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from ..hid_service import PortInfo
 from ..models import ActionDefinition, WorkflowDefinition
-from ..serial_service import PortInfo
 
 
 class StatusCard(QFrame):
@@ -93,7 +93,7 @@ class Dashboard(QWidget):
         status_row.addWidget(StatusCard("检查结果", self.preflight_label), 2)
 
         device_form = QFormLayout()
-        device_form.addRow("串口", self.port_combo)
+        device_form.addRow("设备", self.port_combo)
         device_form.addRow("当前启用目标", self.target_combo)
         device_buttons = QHBoxLayout()
         device_buttons.addWidget(refresh_button)
@@ -139,9 +139,15 @@ class Dashboard(QWidget):
         self.port_combo.blockSignals(True)
         self.port_combo.clear()
         for port in ports:
-            self.port_combo.addItem(f"{port.device} — {port.description}", port.device)
+            # HID 的 ``device`` 是上百字符的设备路径（串口时代这里是 ``COM5`` 这样的短标识），
+            # 直接拼进显示文本会让下拉框不可读。改为只显示 description，完整路径放进悬浮提示，
+            # 既保持可读性，又保留多台同型设备时的区分信息。
+            self.port_combo.addItem(port.description, port.device)
+            self.port_combo.setItemData(
+                self.port_combo.count() - 1, port.device, Qt.ItemDataRole.ToolTipRole
+            )
         if not ports:
-            self.port_combo.addItem("未发现串口", "")
+            self.port_combo.addItem("未发现 HID 设备", "")
         for index in range(self.port_combo.count()):
             if self.port_combo.itemData(index) == preferred:
                 self.port_combo.setCurrentIndex(index)

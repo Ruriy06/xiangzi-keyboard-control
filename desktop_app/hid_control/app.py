@@ -8,13 +8,30 @@ from PySide6.QtGui import QFont, QIcon
 from PySide6.QtWidgets import QApplication, QMessageBox
 
 from . import APP_NAME
+from .hid_service import HidService
 from .hotkeys import GlobalHotkeyService
 from .mouse_hook import MouseSideButtonService
 from .privilege import is_administrator, restart_as_administrator
-from .serial_service import SerialService
+from .runtime_policy import apply_software_render_environment, qt_application_attributes
 from .storage import SettingsStore
 from .workflow import WorkflowRunner
 from .ui.main_window import MainWindow
+
+
+def _enforce_software_rendering() -> None:
+    """在创建 QApplication 之前锁定 Qt 的软件渲染路径。
+
+    - 环境变量确保 Qt 不加载显卡驱动提供的图形后端；
+    - ``AA_UseSoftwareOpenGL`` 让任何 OpenGL 使用都走随包分发的软件实现；
+    - ``AA_ForceRasterWidgets`` 让顶层 Widget 使用纯 CPU 栅格表面。
+
+    这些设置必须在 QApplication 构造前完成，构造之后再设置不会生效。
+    """
+    apply_software_render_environment()
+    for attribute_name in qt_application_attributes():
+        attribute = getattr(Qt.ApplicationAttribute, attribute_name, None)
+        if attribute is not None:
+            QApplication.setAttribute(attribute, True)
 
 
 def _choose_start_mode() -> bool:
@@ -26,7 +43,7 @@ def _choose_start_mode() -> bool:
     dialog.setWindowFlag(Qt.WindowType.WindowStaysOnTopHint, True)
     dialog.setIcon(QMessageBox.Icon.Information)
     dialog.setText("软件当前将以普通模式启动")
-    dialog.setInformativeText("普通模式可使用串口和鼠标侧键控制。管理员模式可改善与管理员权限窗口交互时的兼容性，但不能抢占被其他软件占用的快捷键。")
+    dialog.setInformativeText("普通模式可使用 HID 设备和鼠标侧键控制。管理员模式可改善与管理员权限窗口交互时的兼容性，但不能抢占被其他软件占用的快捷键。")
     elevate_button = dialog.addButton("以管理员模式启动", QMessageBox.ButtonRole.AcceptRole)
     normal_button = dialog.addButton("普通模式启动", QMessageBox.ButtonRole.ActionRole)
     cancel_button = dialog.addButton("取消", QMessageBox.ButtonRole.RejectRole)
@@ -45,6 +62,7 @@ def _resource_path(name: str) -> Path:
 
 
 def run() -> int:
+    _enforce_software_rendering()
     application = QApplication(sys.argv)
     # Windows 11 中文界面统一使用系统可用的微软雅黑 UI，避免键盘选择器标签乱码。
     application.setFont(QFont("Microsoft YaHei UI", 10))
@@ -52,19 +70,19 @@ def run() -> int:
     if icon_path.exists():
         application.setWindowIcon(QIcon(str(icon_path)))
     application.setApplicationName(APP_NAME)
-    application.setOrganizationName("LeonardoHID")
+    application.setOrganizationName("xiangzi")
 
     if not _choose_start_mode():
         return 0
 
     store = SettingsStore()
     state = store.load()
-    serial_service = SerialService()
-    workflow_runner = WorkflowRunner(serial_service)
+    hid_service = HidService()
+    workflow_runner = WorkflowRunner(hid_service)
     hotkeys = GlobalHotkeyService()
     mouse_buttons = MouseSideButtonService()
 
-    window = MainWindow(store, state, serial_service, workflow_runner, hotkeys, mouse_buttons)
+    window = MainWindow(store, state, hid_service, workflow_runner, hotkeys, mouse_buttons)
     if state.window_layout.last_window_state == "minimized":
         window.showMinimized()
     elif state.window_layout.last_window_state == "maximized":
@@ -76,5 +94,5 @@ def run() -> int:
     mouse_buttons.stop()
     hotkeys.stop()
     workflow_runner.close()
-    serial_service.close()
+    hid_service.close()
     return exit_code

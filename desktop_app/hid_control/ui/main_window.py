@@ -16,12 +16,12 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from ..hid_service import HidService
 from ..hotkeys import GlobalHotkeyService
 from ..models import ActionStep, AppState, ControlSettings, DeviceSettings, WorkflowDefinition
 from ..mouse_hook import MouseSideButtonService
 from ..privilege import is_administrator, restart_as_administrator
 from ..protocol import ProtocolError, command_for_step, device_configuration_commands
-from ..serial_service import SerialService
 from ..storage import SettingsStore
 from ..window_capture import primary_screen_resolution
 from ..workflow import WorkflowRunner
@@ -37,7 +37,7 @@ class MainWindow(QMainWindow):
         self,
         store: SettingsStore,
         state: AppState,
-        serial_service: SerialService,
+        hid_service: HidService,
         workflow_runner: WorkflowRunner,
         hotkeys: GlobalHotkeyService,
         mouse_buttons: MouseSideButtonService,
@@ -50,7 +50,7 @@ class MainWindow(QMainWindow):
         screen_width, screen_height = primary_screen_resolution()
         self._state.device.screen_width = screen_width
         self._state.device.screen_height = screen_height
-        self._serial = serial_service
+        self._hid = hid_service
         self._runner = workflow_runner
         self._hotkeys = hotkeys
         self._mouse_buttons = mouse_buttons
@@ -304,12 +304,12 @@ class MainWindow(QMainWindow):
     def _wire_events(self) -> None:
         self.dashboard.refresh_requested.connect(self._refresh_ports)
         self.dashboard.connect_requested.connect(self._connect)
-        self.dashboard.disconnect_requested.connect(self._serial.disconnect)
+        self.dashboard.disconnect_requested.connect(self._hid.disconnect)
         self.dashboard.start_requested.connect(self._start_active_target)
         self.dashboard.stop_requested.connect(self._stop_workflow)
         self.dashboard.target_selected.connect(self._target_selected)
         self.dashboard.sync_requested.connect(self._apply_device_configuration)
-        self.dashboard.query_requested.connect(self._serial.request_device_state)
+        self.dashboard.query_requested.connect(self._hid.request_device_state)
         self.dashboard.preflight_requested.connect(self._run_preflight)
 
         self.actions_page.actions_changed.connect(self._actions_changed)
@@ -322,15 +322,15 @@ class MainWindow(QMainWindow):
 
         self.settings_page.save_requested.connect(self._save_settings)
         self.settings_page.apply_device_requested.connect(self._apply_device_configuration)
-        self.settings_page.query_device_requested.connect(self._serial.request_device_state)
+        self.settings_page.query_device_requested.connect(self._hid.request_device_state)
         self.settings_page.restore_defaults_requested.connect(self._restore_device_defaults)
         self.settings_page.elevate_requested.connect(self._restart_elevated)
         self.settings_page.theme_changed.connect(self._theme_changed)
 
-        self._serial.message_sent.connect(lambda message: self._log(f"→ {message}"))
-        self._serial.message_received.connect(self._serial_message_received)
-        self._serial.error_occurred.connect(self._log)
-        self._serial.connection_changed.connect(self._connection_changed)
+        self._hid.message_sent.connect(lambda message: self._log(f"→ {message}"))
+        self._hid.message_received.connect(self._hid_message_received)
+        self._hid.error_occurred.connect(self._log)
+        self._hid.connection_changed.connect(self._connection_changed)
         self._runner.log_message.connect(self._log)
         self._runner.status_changed.connect(self._workflow_status_changed)
         self._hotkeys.activated.connect(self._handle_control)
@@ -351,18 +351,18 @@ class MainWindow(QMainWindow):
         self.dashboard.set_targets(self._state.workflows, self._state.actions, self._state.active_target_kind, self._state.active_target_id)
 
     def _refresh_ports(self) -> None:
-        ports = self._serial.available_ports()
+        ports = self._hid.available_ports()
         self.dashboard.set_ports(ports, self._state.device.port)
-        self._log(f"发现 {len(ports)} 个串口")
+        self._log(f"发现 {len(ports)} 个 HID 设备")
 
     def _connect(self, port: str) -> None:
         if not port:
-            self._log("请先选择有效串口")
+            self._log("请先选择有效的 HID 设备")
             return
-        if self._serial.connect(port, self._state.device.baud_rate):
+        if self._hid.connect(port, self._state.device.baud_rate):
             self._state.device.port = port
             self._save_state()
-            self._serial.request_device_state()
+            self._hid.request_device_state()
 
     def _connection_changed(self, connected: bool, text: str) -> None:
         self.dashboard.set_connection(connected, text)
@@ -374,10 +374,10 @@ class MainWindow(QMainWindow):
             self._state.device.screen_height = height
             self._save_state()
             self.settings_page.set_values(self._state.device, self._state.controls, is_administrator())
-            self._serial.send(f"{{SCR_{width}_{height}}}")
+            self._hid.send(f"{{SCR_{width}_{height}}}")
             self._log(f"已自动同步主显示器分辨率到设备：{width}×{height}")
 
-    def _serial_message_received(self, message: str) -> None:
+    def _hid_message_received(self, message: str) -> None:
         self._log(f"← {message}")
         self.settings_page.update_device_status(message)
 
@@ -387,7 +387,7 @@ class MainWindow(QMainWindow):
             source.set_move_preview_status(message)
             self._log(message)
             return
-        if not self._serial.is_connected:
+        if not self._hid.is_connected:
             message = "试移失败：设备未连接。请先在控制台连接 Leonardo。"
             source.set_move_preview_status(message)
             self._log(message)
@@ -399,12 +399,12 @@ class MainWindow(QMainWindow):
             source.set_move_preview_status(message)
             self._log(message)
             return
-        if command and self._serial.send(command):
+        if command and self._hid.send(command):
             message = f"已发送试移命令：{command}；该移动不会保存到操作。"
             source.set_move_preview_status(message)
             self._log(message)
         else:
-            source.set_move_preview_status("试移发送失败；请查看控制台日志并检查串口连接。")
+            source.set_move_preview_status("试移发送失败；请查看控制台日志并检查设备连接。")
 
     def _theme_changed(self, theme: str) -> None:
         if theme not in {"light", "dark_blue"}: 
@@ -430,8 +430,8 @@ class MainWindow(QMainWindow):
         self._state.device = DeviceSettings.defaults(previous.port, previous.baud_rate)
         self._save_state()
         self.settings_page.set_values(self._state.device, self._state.controls, is_administrator())
-        if self._serial.is_connected:
-            self._serial.send("{CFG_RESET}")
+        if self._hid.is_connected:
+            self._hid.send("{CFG_RESET}")
             self._log("软件和已连接设备已恢复固件默认配置：2560×1440")
         else:
             self._log("本地设备配置已恢复默认值；连接后可点击“保存并下发到设备”同步")
@@ -498,7 +498,7 @@ class MainWindow(QMainWindow):
         errors: list[str] = []
         target_id = self._state.active_target_id
         kind = self._state.active_target_kind
-        if not self._serial.is_connected:
+        if not self._hid.is_connected:
             errors.append("Leonardo 未连接")
         if kind == "action":
             action = next((item for item in self._state.actions if item.id == target_id), None)
@@ -569,12 +569,12 @@ class MainWindow(QMainWindow):
         self._log("已请求停止并释放全部按键/鼠标键")
 
     def _apply_device_configuration(self) -> None:
-        if not self._serial.is_connected:
+        if not self._hid.is_connected:
             self._log("请先连接设备，再下发配置")
             return
         try:
             for command in device_configuration_commands(self._state.device):
-                self._serial.send(command)
+                self._hid.send(command)
             self._log("设备配置已下发")
         except ProtocolError as error:
             self._log(f"配置无效：{error}")
@@ -716,7 +716,7 @@ class MainWindow(QMainWindow):
 
     def closeEvent(self, event: QCloseEvent) -> None:
         self._runner.stop()
-        self._serial.send_stop()
+        self._hid.send_stop()
         screen = QGuiApplication.primaryScreen()
         available = screen.availableGeometry() if screen else self.geometry()
         if available.width() and available.height() and not self.isMaximized():

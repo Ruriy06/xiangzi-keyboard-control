@@ -87,7 +87,7 @@ class WorkflowTests(unittest.TestCase):
 
         window = PreviewWindow()
         window._runner = type("Runner", (), {"is_running": False})()
-        window._serial = serial
+        window._hid = serial
         MainWindow._preview_move(window, ActionStep(ActionKind.MOVE_NORMALIZED, "500_500"), PreviewSource())
 
         self.assertEqual(serial.commands, ["{MOVE_NORM_500_500}"])

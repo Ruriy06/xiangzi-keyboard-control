@@ -1,0 +1,36 @@
+# -*- mode: python ; coding: utf-8 -*-
+#
+# xiangzi.exe 的 Windows 版本资源（“属性 → 详细信息”里显示的内容）。
+# 由 xiangzi.spec 的 EXE(version=...) 引用。
+#
+# ⚠ 版本号必须与 hid_control/__init__.py 里的 APP_VERSION 保持一致，
+#   改版本时两处一起改（filevers/prodvers 是四段数字，0.1.1 → (0, 1, 1, 0)）。
+VSVersionInfo(
+  ffi=FixedFileInfo(
+    filevers=(0, 1, 1, 0),
+    prodvers=(0, 1, 1, 0),
+    mask=0x3f,
+    flags=0x0,
+    OS=0x40004,
+    fileType=0x1,
+    subtype=0x0,
+    date=(0, 0)
+  ),
+  kids=[
+    StringFileInfo(
+      [
+        StringTable(
+          '080404B0',
+          [
+            StringStruct('FileDescription', '祥子的宝贝 —— Leonardo 硬件键鼠控制'),
+            StringStruct('FileVersion', '0.1.1'),
+            StringStruct('InternalName', 'xiangzi'),
+            StringStruct('OriginalFilename', 'xiangzi.exe'),
+            StringStruct('ProductName', '祥子的宝贝'),
+            StringStruct('ProductVersion', '0.1.1'),
+          ]
+        )
+      ]),
+    VarFileInfo([VarStruct('Translation', [2052, 1200])])
+  ]
+)
